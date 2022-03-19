@@ -122,7 +122,14 @@ class Superwar {
     // Check for fight
     isFight = () => {
         // Type your code here
-
+        var state = false;
+        this.players.map(ele => {
+            if (ele.selected && ele.strength > 0)
+                state = true;
+            else
+                state = false;
+        });
+        return (state ? 'clash' : 'peace');
         // return  'clash' or 'peace';
     }
 
@@ -131,6 +138,19 @@ class Superwar {
         // Filtered the selected players and calculate score
         // Should return HTML element with score
         // Type your code here
+
+        let fighters = this.players.filter(player => player.selected);
+
+        fighters.forEach(player => {
+            if (player.strength > 0)
+                player.wins += 1;
+        });
+
+        let score = this.calculateScore();
+        document.getElementById('score').innerHTML =
+            score['hero'] + ' - ' + score['villain'];
+        this.viewPlayers();
+
 
         if (this.checkWin() !== 'endure')
             setTimeout(() => this.announceWinner(score), 100);
@@ -141,6 +161,11 @@ class Superwar {
         // Calculate and return the total score of teams
         // Type your code here
 
+        let score = { hero: 0, villain: 0 };
+        this.players.reduce(player => {
+            score[player.type] += player.wins;
+        });
+
         return score;
     }
 
@@ -150,13 +175,25 @@ class Superwar {
         // If winner dosen't exists then return endure
         // Type your code here
 
-      return result;
+        let heroStrength = this.totalStrength('hero');
+        let villainStrength = this.totalStrength('villain')
+        if (heroStrength == 0 && villainStrength == 0) {
+            strength = 'endure';
+        } else {
+            strength = heroStrength == 0 ? 'villain' : 'hero';
+
+        }
+        return strength;
+        
     }
 
     // Find total strength of a team
     totalStrength = (type) => {
         // Calculate and return the total strength of the team
         // Type your code here
+        let playertypes = this.players.filter(player => player.type == type);
+        let strength = playertypes.reduce((totalStrength, player) =>
+            totalStrength + player.strength, 0)
 
         return strength;
     }
@@ -165,7 +202,7 @@ class Superwar {
     announceWinner = (score) => {
         if (score['hero'] == score['villain'])
             alert('Its a draw!');
-        else if (score['hero'] > score['villain'])
+        else if (score['hero'] > score['villain'] || score['villain']===0)
             alert('Heroes Win!');
         else
             alert('Villains Win!');
